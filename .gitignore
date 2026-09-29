@@ -1,0 +1,20 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Raw datasets
+*.parquet
+*.xlsx
+
+# Generated processed datasets
+data/processed/
+
+# Compiled C++ binaries
+bin/
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
