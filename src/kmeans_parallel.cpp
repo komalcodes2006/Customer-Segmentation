@@ -9,6 +9,8 @@
 #include <limits>
 #include <stdexcept>
 #include <string>
+#include <algorithm>
+#include <cctype>
 #include <omp.h>
 
 using namespace std;
@@ -26,6 +28,38 @@ using Point = array<double, FEATURES>;
 // -----------------------------
 // Load CSV Data
 // -----------------------------
+string trim(const string& value) {
+    const auto first = value.find_first_not_of(" \t\r\n");
+    if (first == string::npos) {
+        return "";
+    }
+
+    const auto last = value.find_last_not_of(" \t\r\n");
+    return value.substr(first, last - first + 1);
+}
+
+vector<string> splitCsvLine(const string& line) {
+    vector<string> fields;
+    string value;
+    stringstream ss(line);
+
+    while (getline(ss, value, ',')) {
+        fields.push_back(trim(value));
+    }
+
+    return fields;
+}
+
+int findColumn(const vector<string>& headers, const string& name) {
+    for (size_t i = 0; i < headers.size(); i++) {
+        if (trim(headers[i]) == name) {
+            return static_cast<int>(i);
+        }
+    }
+
+    return -1;
+}
+
 vector<Point> loadData(const string& filename) {
     ifstream file(filename);
 
@@ -36,26 +70,47 @@ vector<Point> loadData(const string& filename) {
     vector<Point> data;
     string line;
 
-    // Skip header
-    getline(file, line);
+    if (!getline(file, line)) {
+        throw runtime_error("CSV is empty: " + filename);
+    }
+
+    const vector<string> headers = splitCsvLine(line);
+    const int ordersColumn = findColumn(
+        headers, "lifetime_orders"
+    );
+    const int spendColumn = findColumn(
+        headers, "lifetime_spend"
+    );
+    const int aovColumn = findColumn(
+        headers, "average_order_value"
+    );
+
+    if (ordersColumn < 0 || spendColumn < 0 || aovColumn < 0) {
+        throw runtime_error(
+            "CSV must contain lifetime_orders, lifetime_spend, and "
+            "average_order_value columns"
+        );
+    }
 
     while (getline(file, line)) {
         if (line.empty()) {
             continue;
         }
 
-        stringstream ss(line);
-        string value;
-
+        const vector<string> fields = splitCsvLine(line);
         Point point{};
 
+        if (ordersColumn >= static_cast<int>(fields.size()) ||
+            spendColumn >= static_cast<int>(fields.size()) ||
+            aovColumn >= static_cast<int>(fields.size())) {
+            throw runtime_error("Invalid CSV row: " + line);
+        }
+
+        point[0] = stod(fields[ordersColumn]);
+        point[1] = stod(fields[spendColumn]);
+        point[2] = stod(fields[aovColumn]);
+
         for (int j = 0; j < FEATURES; j++) {
-            if (!getline(ss, value, ',')) {
-                throw runtime_error("Invalid CSV row");
-            }
-
-            point[j] = stod(value);
-
             if (!isfinite(point[j])) {
                 throw runtime_error("Non-finite value found in dataset");
             }
