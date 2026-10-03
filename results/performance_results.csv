@@ -1,0 +1,306 @@
+﻿"DatasetSize","Implementation","Threads","ExecutionTimeSeconds","Iterations","Inertia","Cluster0","Cluster1","Cluster2","Cluster3","ClusterSizes","Speedup","ParallelEfficiencyPercent","Output"
+"10000","Sequential","1","0.006568","41","783.082","","","","",";;;",,,"Customers: 10000
+K: 4
+Iterations: 41
+Execution time: 0.006568 seconds
+Inertia: 783.082
+
+Cluster 0 (1302 customers)
+Centroid: 1.301 1.35459 1.29019 
+
+Cluster 1 (654 customers)
+Centroid: 2.59198 1.79226 1.41709 
+
+Cluster 2 (1956 customers)
+Centroid: 0.412323 0.902663 1.10566 
+
+Cluster 3 (6088 customers)
+Centroid: -0.686024 -0.775815 -0.78912"
+"10000","Parallel","1","0.0090256","41","783.082","1302","654","1956","6088","1302;654;1956;6088","0.727707853217515","72.7707853217515","Customers: 10000
+K: 4
+Threads: 1
+Iterations: 41
+Execution time: 0.0090256 seconds
+Inertia: 783.082
+Cluster sizes:
+Cluster 0: 1302
+Cluster 1: 654
+Cluster 2: 1956
+Cluster 3: 6088"
+"10000","Parallel","2","0.0169509","41","783.082","1302","654","1956","6088","1302;654;1956;6088","0.387472051631477","19.3736025815738","Customers: 10000
+K: 4
+Threads: 2
+Iterations: 41
+Execution time: 0.0169509 seconds
+Inertia: 783.082
+Cluster sizes:
+Cluster 0: 1302
+Cluster 1: 654
+Cluster 2: 1956
+Cluster 3: 6088"
+"10000","Parallel","4","0.0203015","41","783.082","1302","654","1956","6088","1302;654;1956;6088","0.323522892397114","8.08807230992784","Customers: 10000
+K: 4
+Threads: 4
+Iterations: 41
+Execution time: 0.0203015 seconds
+Inertia: 783.082
+Cluster sizes:
+Cluster 0: 1302
+Cluster 1: 654
+Cluster 2: 1956
+Cluster 3: 6088"
+"10000","Parallel","8","0.0250002","41","783.082","1302","654","1956","6088","1302;654;1956;6088","0.262717898256814","3.28397372821017","Customers: 10000
+K: 4
+Threads: 8
+Iterations: 41
+Execution time: 0.0250002 seconds
+Inertia: 783.082
+Cluster sizes:
+Cluster 0: 1302
+Cluster 1: 654
+Cluster 2: 1956
+Cluster 3: 6088"
+"50000","Sequential","1","0.036569","39","3889.63","","","","",";;;",,,"Customers: 50000
+K: 4
+Iterations: 39
+Execution time: 0.036569 seconds
+Inertia: 3889.63
+
+Cluster 0 (6521 customers)
+Centroid: 1.28857 1.35176 1.29092 
+
+Cluster 1 (30269 customers)
+Centroid: -0.686305 -0.775932 -0.789252 
+
+Cluster 2 (3244 customers)
+Centroid: 2.60219 1.79406 1.4165 
+
+Cluster 3 (9966 customers)
+Centroid: 0.413522 0.910152 1.11368"
+"50000","Parallel","1","0.031183","39","3889.63","6521","30269","3244","9966","6521;30269;3244;9966","1.17272231664689","117.272231664689","Customers: 50000
+K: 4
+Threads: 1
+Iterations: 39
+Execution time: 0.031183 seconds
+Inertia: 3889.63
+Cluster sizes:
+Cluster 0: 6521
+Cluster 1: 30269
+Cluster 2: 3244
+Cluster 3: 9966"
+"50000","Parallel","2","0.042664","39","3889.63","6521","30269","3244","9966","6521;30269;3244;9966","0.857139508719295","42.8569754359647","Customers: 50000
+K: 4
+Threads: 2
+Iterations: 39
+Execution time: 0.042664 seconds
+Inertia: 3889.63
+Cluster sizes:
+Cluster 0: 6521
+Cluster 1: 30269
+Cluster 2: 3244
+Cluster 3: 9966"
+"50000","Parallel","4","0.0458875","39","3889.63","6521","9966","3244","30269","6521;9966;3244;30269","0.796927267774448","19.9231816943612","Customers: 50000
+K: 4
+Threads: 4
+Iterations: 39
+Execution time: 0.0458875 seconds
+Inertia: 3889.63
+Cluster sizes:
+Cluster 0: 6521
+Cluster 1: 9966
+Cluster 2: 3244
+Cluster 3: 30269"
+"50000","Parallel","8","0.0452007","39","3889.63","6521","9966","3244","30269","6521;9966;3244;30269","0.809036143245569","10.1129517905696","Customers: 50000
+K: 4
+Threads: 8
+Iterations: 39
+Execution time: 0.0452007 seconds
+Inertia: 3889.63
+Cluster sizes:
+Cluster 0: 6521
+Cluster 1: 9966
+Cluster 2: 3244
+Cluster 3: 30269"
+"100000","Sequential","1","0.0671244","34","7734.9","","","","",";;;",,,"Customers: 100000
+K: 4
+Iterations: 34
+Execution time: 0.0671244 seconds
+Inertia: 7734.9
+
+Cluster 0 (19697 customers)
+Centroid: 0.413288 0.910804 1.1145 
+
+Cluster 1 (60842 customers)
+Centroid: -0.686273 -0.775923 -0.789242 
+
+Cluster 2 (12871 customers)
+Centroid: 1.29201 1.35445 1.29289 
+
+Cluster 3 (6590 customers)
+Centroid: 2.60713 1.79355 1.41462"
+"100000","Parallel","1","0.0625453","34","7734.9","19697","60842","12871","6590","19697;60842;12871;6590","1.07321253555423","107.321253555423","Customers: 100000
+K: 4
+Threads: 1
+Iterations: 34
+Execution time: 0.0625453 seconds
+Inertia: 7734.9
+Cluster sizes:
+Cluster 0: 19697
+Cluster 1: 60842
+Cluster 2: 12871
+Cluster 3: 6590"
+"100000","Parallel","2","0.0675355","34","7734.9","19697","60842","12871","6590","19697;60842;12871;6590","0.993912831029607","49.6956415514803","Customers: 100000
+K: 4
+Threads: 2
+Iterations: 34
+Execution time: 0.0675355 seconds
+Inertia: 7734.9
+Cluster sizes:
+Cluster 0: 19697
+Cluster 1: 60842
+Cluster 2: 12871
+Cluster 3: 6590"
+"100000","Parallel","4","0.0634483","34","7734.9","19697","60842","12871","6590","19697;60842;12871;6590","1.05793851056687","26.4484627641718","Customers: 100000
+K: 4
+Threads: 4
+Iterations: 34
+Execution time: 0.0634483 seconds
+Inertia: 7734.9
+Cluster sizes:
+Cluster 0: 19697
+Cluster 1: 60842
+Cluster 2: 12871
+Cluster 3: 6590"
+"100000","Parallel","8","0.0571823","34","7734.9","19697","60842","12871","6590","19697;60842;12871;6590","1.17386673848376","14.673334231047","Customers: 100000
+K: 4
+Threads: 8
+Iterations: 34
+Execution time: 0.0571823 seconds
+Inertia: 7734.9
+Cluster sizes:
+Cluster 0: 19697
+Cluster 1: 60842
+Cluster 2: 12871
+Cluster 3: 6590"
+"500000","Sequential","1","0.356706","41","39002.3","","","","",";;;",,,"Customers: 500000
+K: 4
+Iterations: 41
+Execution time: 0.356706 seconds
+Inertia: 39002.3
+
+Cluster 0 (64212 customers)
+Centroid: 1.29187 1.35617 1.29487 
+
+Cluster 1 (32431 customers)
+Centroid: 2.60909 1.79275 1.4132 
+
+Cluster 2 (303712 customers)
+Centroid: -0.686218 -0.775888 -0.789203 
+
+Cluster 3 (99645 customers)
+Centroid: 0.413244 0.910122 1.11375"
+"500000","Parallel","1","0.343764","41","39002.3","64212","32431","303712","99645","64212;32431;303712;99645","1.0376479212483","103.76479212483","Customers: 500000
+K: 4
+Threads: 1
+Iterations: 41
+Execution time: 0.343764 seconds
+Inertia: 39002.3
+Cluster sizes:
+Cluster 0: 64212
+Cluster 1: 32431
+Cluster 2: 303712
+Cluster 3: 99645"
+"500000","Parallel","2","0.263253","39","39002.3","64213","32431","99644","303712","64213;32431;99644;303712","1.35499310549168","67.7496552745838","Customers: 500000
+K: 4
+Threads: 2
+Iterations: 39
+Execution time: 0.263253 seconds
+Inertia: 39002.3
+Cluster sizes:
+Cluster 0: 64213
+Cluster 1: 32431
+Cluster 2: 99644
+Cluster 3: 303712"
+"500000","Parallel","4","0.234424","39","39002.3","64213","32431","99644","303712","64213;32431;99644;303712","1.52162747841518","38.0406869603795","Customers: 500000
+K: 4
+Threads: 4
+Iterations: 39
+Execution time: 0.234424 seconds
+Inertia: 39002.3
+Cluster sizes:
+Cluster 0: 64213
+Cluster 1: 32431
+Cluster 2: 99644
+Cluster 3: 303712"
+"500000","Parallel","8","0.228784","41","39002.3","64212","32431","303712","99645","64212;32431;303712;99645","1.55913875096161","19.4892343870201","Customers: 500000
+K: 4
+Threads: 8
+Iterations: 41
+Execution time: 0.228784 seconds
+Inertia: 39002.3
+Cluster sizes:
+Cluster 0: 64212
+Cluster 1: 32431
+Cluster 2: 303712
+Cluster 3: 99645"
+"1000000","Sequential","1","0.760565","43","77692.8","","","","",";;;",,,"Customers: 1000000
+K: 4
+Iterations: 43
+Execution time: 0.760565 seconds
+Inertia: 77692.8
+
+Cluster 0 (128199 customers)
+Centroid: 1.2914 1.35675 1.29568 
+
+Cluster 1 (199088 customers)
+Centroid: 0.413537 0.910892 1.11451 
+
+Cluster 2 (64871 customers)
+Centroid: 2.60899 1.79354 1.41411 
+
+Cluster 3 (607842 customers)
+Centroid: -0.686255 -0.775908 -0.789226"
+"1000000","Parallel","1","0.669368","43","77692.8","128199","199088","64871","607842","128199;199088;64871;607842","1.13624344157474","113.624344157474","Customers: 1000000
+K: 4
+Threads: 1
+Iterations: 43
+Execution time: 0.669368 seconds
+Inertia: 77692.8
+Cluster sizes:
+Cluster 0: 128199
+Cluster 1: 199088
+Cluster 2: 64871
+Cluster 3: 607842"
+"1000000","Parallel","2","0.510029","43","77692.8","128199","199088","64871","607842","128199;199088;64871;607842","1.49121912675554","74.5609563377769","Customers: 1000000
+K: 4
+Threads: 2
+Iterations: 43
+Execution time: 0.510029 seconds
+Inertia: 77692.8
+Cluster sizes:
+Cluster 0: 128199
+Cluster 1: 199088
+Cluster 2: 64871
+Cluster 3: 607842"
+"1000000","Parallel","4","0.53009","43","77692.8","128199","199088","64871","607842","128199;199088;64871;607842","1.43478465920881","35.8696164802203","Customers: 1000000
+K: 4
+Threads: 4
+Iterations: 43
+Execution time: 0.53009 seconds
+Inertia: 77692.8
+Cluster sizes:
+Cluster 0: 128199
+Cluster 1: 199088
+Cluster 2: 64871
+Cluster 3: 607842"
+"1000000","Parallel","8","0.467497","43","77692.8","128199","199088","64871","607842","128199;199088;64871;607842","1.62688744526703","20.3360930658379","Customers: 1000000
+K: 4
+Threads: 8
+Iterations: 43
+Execution time: 0.467497 seconds
+Inertia: 77692.8
+Cluster sizes:
+Cluster 0: 128199
+Cluster 1: 199088
+Cluster 2: 64871
+Cluster 3: 607842"

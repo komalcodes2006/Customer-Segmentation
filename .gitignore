@@ -18,3 +18,11 @@ bin/
 
 # VS Code
 .vscode/
+
+# Temporary/generated local files
+compile_error.txt
+customer_features.csv
+
+# Temporary/generated local files
+compile_error.txt
+customer_features.csv
