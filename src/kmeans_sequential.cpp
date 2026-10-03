@@ -9,10 +9,12 @@
 #include <limits>
 #include <stdexcept>
 #include <string>
+#include <algorithm>
+#include <cctype>
 
 using namespace std;
 
-// Our dataset has exactly three numerical features.
+// K-Means features: lifetime orders, lifetime spend, and AOV.
 constexpr int FEATURES = 3;
 constexpr int K = 4;
 constexpr int MAX_ITERATIONS = 100;
@@ -24,6 +26,38 @@ using Point = array<double, FEATURES>;
 // 1. Read the preprocessed CSV file
 // --------------------------------------------------
 
+string trim(const string& value) {
+    const auto first = value.find_first_not_of(" \t\r\n");
+    if (first == string::npos) {
+        return "";
+    }
+
+    const auto last = value.find_last_not_of(" \t\r\n");
+    return value.substr(first, last - first + 1);
+}
+
+vector<string> splitCsvLine(const string& line) {
+    vector<string> fields;
+    string value;
+    stringstream ss(line);
+
+    while (getline(ss, value, ',')) {
+        fields.push_back(trim(value));
+    }
+
+    return fields;
+}
+
+int findColumn(const vector<string>& headers, const string& name) {
+    for (size_t i = 0; i < headers.size(); i++) {
+        if (trim(headers[i]) == name) {
+            return static_cast<int>(i);
+        }
+    }
+
+    return -1;
+}
+
 vector<Point> loadData(const string& filename) {
     ifstream file(filename);
 
@@ -34,31 +68,59 @@ vector<Point> loadData(const string& filename) {
     vector<Point> data;
     string line;
 
-    // Skip the CSV header.
-    getline(file, line);
+    if (!getline(file, line)) {
+        throw runtime_error("CSV is empty: " + filename);
+    }
+
+    const vector<string> headers = splitCsvLine(line);
+    const int ordersColumn = findColumn(
+        headers, "lifetime_orders"
+    );
+    const int spendColumn = findColumn(
+        headers, "lifetime_spend"
+    );
+    const int aovColumn = findColumn(
+        headers, "average_order_value"
+    );
+
+    if (ordersColumn < 0 || spendColumn < 0 || aovColumn < 0) {
+        throw runtime_error(
+            "CSV must contain lifetime_orders, lifetime_spend, and "
+            "average_order_value columns"
+        );
+    }
 
     while (getline(file, line)) {
-        if (line.empty()) {
+        if (trim(line).empty()) {
             continue;
         }
 
-        stringstream ss(line);
-        string value;
-        Point point;
+        try {
+            const vector<string> fields = splitCsvLine(line);
+            Point point{};
 
-        for (int j = 0; j < FEATURES; j++) {
-            if (!getline(ss, value, ',')) {
+            if (ordersColumn >= static_cast<int>(fields.size()) ||
+                spendColumn >= static_cast<int>(fields.size()) ||
+                aovColumn >= static_cast<int>(fields.size())) {
                 throw runtime_error("Invalid CSV row: " + line);
             }
 
-            point[j] = stod(value);
+            point[0] = stod(fields[ordersColumn]);
+            point[1] = stod(fields[spendColumn]);
+            point[2] = stod(fields[aovColumn]);
 
-            if (!isfinite(point[j])) {
-                throw runtime_error("Non-finite feature value");
+            for (int j = 0; j < FEATURES; j++) {
+                if (!isfinite(point[j])) {
+                    throw runtime_error("Non-finite feature value");
+                }
             }
-        }
 
-        data.push_back(point);
+            data.push_back(point);
+        } catch (const invalid_argument&) {
+            throw runtime_error("Invalid numeric value in CSV row: " + line);
+        } catch (const out_of_range&) {
+            throw runtime_error("Numeric value out of range in CSV row: " + line);
+        }
     }
 
     if (data.size() < K) {

@@ -9,6 +9,8 @@
 #include <limits>
 #include <stdexcept>
 #include <string>
+#include <algorithm>
+#include <cctype>
 #include <omp.h>
 
 using namespace std;
@@ -16,6 +18,7 @@ using namespace std;
 // -----------------------------
 // K-Means Configuration
 // -----------------------------
+
 const int FEATURES = 3;
 const int K = 4;
 const int MAX_ITERATIONS = 100;
@@ -24,9 +27,62 @@ const double TOLERANCE = 1e-4;
 using Point = array<double, FEATURES>;
 
 // -----------------------------
+// Helper: Trim whitespace
+// -----------------------------
+
+string trim(const string& value) {
+    const auto first = value.find_first_not_of(" \t\r\n");
+
+    if (first == string::npos) {
+        return "";
+    }
+
+    const auto last = value.find_last_not_of(" \t\r\n");
+
+    return value.substr(first, last - first + 1);
+}
+
+// -----------------------------
+// Helper: Split CSV line
+// -----------------------------
+
+vector<string> splitCsvLine(const string& line) {
+    vector<string> fields;
+    string value;
+
+    stringstream ss(line);
+
+    while (getline(ss, value, ',')) {
+        fields.push_back(trim(value));
+    }
+
+    return fields;
+}
+
+// -----------------------------
+// Find column by name
+// -----------------------------
+
+int findColumn(
+    const vector<string>& headers,
+    const string& name
+) {
+    for (size_t i = 0; i < headers.size(); i++) {
+
+        if (trim(headers[i]) == name) {
+            return static_cast<int>(i);
+        }
+    }
+
+    return -1;
+}
+
+// -----------------------------
 // Load CSV Data
 // -----------------------------
+
 vector<Point> loadData(const string& filename) {
+
     ifstream file(filename);
 
     if (!file.is_open()) {
@@ -36,28 +92,61 @@ vector<Point> loadData(const string& filename) {
     vector<Point> data;
     string line;
 
-    // Skip header
-    getline(file, line);
+    // Read header
+    if (!getline(file, line)) {
+        throw runtime_error("CSV is empty: " + filename);
+    }
 
+    const vector<string> headers = splitCsvLine(line);
+
+    const int ordersColumn =
+        findColumn(headers, "lifetime_orders");
+
+    const int spendColumn =
+        findColumn(headers, "lifetime_spend");
+
+    const int aovColumn =
+        findColumn(headers, "average_order_value");
+
+    if (ordersColumn < 0 ||
+        spendColumn < 0 ||
+        aovColumn < 0) {
+
+        throw runtime_error(
+            "CSV must contain lifetime_orders, "
+            "lifetime_spend, and "
+            "average_order_value columns"
+        );
+    }
+
+    // Read data
     while (getline(file, line)) {
+
         if (line.empty()) {
             continue;
         }
 
-        stringstream ss(line);
-        string value;
+        const vector<string> fields = splitCsvLine(line);
 
         Point point{};
 
-        for (int j = 0; j < FEATURES; j++) {
-            if (!getline(ss, value, ',')) {
-                throw runtime_error("Invalid CSV row");
-            }
+        if (ordersColumn >= static_cast<int>(fields.size()) ||
+            spendColumn >= static_cast<int>(fields.size()) ||
+            aovColumn >= static_cast<int>(fields.size())) {
 
-            point[j] = stod(value);
+            throw runtime_error("Invalid CSV row: " + line);
+        }
+
+        point[0] = stod(fields[ordersColumn]);
+        point[1] = stod(fields[spendColumn]);
+        point[2] = stod(fields[aovColumn]);
+
+        for (int j = 0; j < FEATURES; j++) {
 
             if (!isfinite(point[j])) {
-                throw runtime_error("Non-finite value found in dataset");
+                throw runtime_error(
+                    "Non-finite value found in dataset"
+                );
             }
         }
 
@@ -65,7 +154,9 @@ vector<Point> loadData(const string& filename) {
     }
 
     if (data.size() < K) {
-        throw runtime_error("Dataset must contain at least K points");
+        throw runtime_error(
+            "Dataset must contain at least K points"
+        );
     }
 
     return data;
@@ -74,14 +165,18 @@ vector<Point> loadData(const string& filename) {
 // -----------------------------
 // Squared Euclidean Distance
 // -----------------------------
+
 double squaredDistance(
     const Point& a,
     const Point& b
 ) {
+
     double distance = 0.0;
 
     for (int j = 0; j < FEATURES; j++) {
+
         double diff = a[j] - b[j];
+
         distance += diff * diff;
     }
 
@@ -92,25 +187,32 @@ double squaredDistance(
 // Initialize Centroids
 // Same initialization as sequential
 // -----------------------------
+
 vector<Point> initializeCentroids(
     const vector<Point>& data
 ) {
+
     mt19937 generator(42);
 
     vector<int> indices(data.size());
 
-    for (int i = 0; i < static_cast<int>(data.size()); i++) {
+    for (int i = 0;
+         i < static_cast<int>(data.size());
+         i++) {
+
         indices[i] = i;
     }
 
     // Partial Fisher-Yates shuffle
     for (int i = 0; i < K; i++) {
+
         uniform_int_distribution<int> distribution(
             i,
             static_cast<int>(data.size()) - 1
         );
 
         int j = distribution(generator);
+
         swap(indices[i], indices[j]);
     }
 
@@ -126,23 +228,33 @@ vector<Point> initializeCentroids(
 // -----------------------------
 // Parallel Cluster Assignment
 // -----------------------------
+
 void assignClustersParallel(
     const vector<Point>& data,
     const vector<Point>& centroids,
     vector<int>& labels
 ) {
-    #pragma omp parallel for
-    for (int i = 0; i < static_cast<int>(data.size()); i++) {
 
-        double bestDistance = numeric_limits<double>::max();
+    #pragma omp parallel for
+    for (int i = 0;
+         i < static_cast<int>(data.size());
+         i++) {
+
+        double bestDistance =
+            numeric_limits<double>::max();
+
         int bestCluster = 0;
 
         for (int c = 0; c < K; c++) {
 
             double distance =
-                squaredDistance(data[i], centroids[c]);
+                squaredDistance(
+                    data[i],
+                    centroids[c]
+                );
 
             if (distance < bestDistance) {
+
                 bestDistance = distance;
                 bestCluster = c;
             }
@@ -156,11 +268,13 @@ void assignClustersParallel(
 // Parallel Centroid Update
 // Using thread-local accumulation
 // -----------------------------
+
 vector<Point> updateCentroidsParallel(
     const vector<Point>& data,
     const vector<int>& labels,
     const vector<Point>& oldCentroids
 ) {
+
     int numThreads = omp_get_max_threads();
 
     // threadSums[thread][cluster][feature]
@@ -176,9 +290,11 @@ vector<Point> updateCentroidsParallel(
     for (int t = 0; t < numThreads; t++) {
 
         for (int c = 0; c < K; c++) {
+
             threadCounts[t][c] = 0;
 
             for (int j = 0; j < FEATURES; j++) {
+
                 threadSums[t][c][j] = 0.0;
             }
         }
@@ -190,31 +306,38 @@ vector<Point> updateCentroidsParallel(
         int threadId = omp_get_thread_num();
 
         #pragma omp for
-        for (int i = 0; i < static_cast<int>(data.size()); i++) {
+        for (int i = 0;
+             i < static_cast<int>(data.size());
+             i++) {
 
             int cluster = labels[i];
 
             threadCounts[threadId][cluster]++;
 
             for (int j = 0; j < FEATURES; j++) {
-                threadSums[threadId][cluster][j] += data[i][j];
+
+                threadSums[threadId][cluster][j]
+                    += data[i][j];
             }
         }
     }
 
     // Reduce thread-local results
     vector<Point> newCentroids(K);
+
     vector<int> totalCounts(K, 0);
 
     for (int c = 0; c < K; c++) {
 
         for (int t = 0; t < numThreads; t++) {
 
-            totalCounts[c] += threadCounts[t][c];
+            totalCounts[c]
+                += threadCounts[t][c];
 
             for (int j = 0; j < FEATURES; j++) {
-                newCentroids[c][j] +=
-                    threadSums[t][c][j];
+
+                newCentroids[c][j]
+                    += threadSums[t][c][j];
             }
         }
     }
@@ -223,13 +346,16 @@ vector<Point> updateCentroidsParallel(
     for (int c = 0; c < K; c++) {
 
         if (totalCounts[c] == 0) {
+
             // Preserve old centroid if cluster is empty
             newCentroids[c] = oldCentroids[c];
         }
         else {
+
             for (int j = 0; j < FEATURES; j++) {
-                newCentroids[c][j] /=
-                    totalCounts[c];
+
+                newCentroids[c][j]
+                    /= totalCounts[c];
             }
         }
     }
@@ -240,12 +366,17 @@ vector<Point> updateCentroidsParallel(
 // -----------------------------
 // Parallel K-Means
 // -----------------------------
+
 vector<Point> runKMeansParallel(
     const vector<Point>& data,
-    vector<int>& labels
+    vector<int>& labels,
+    int& iterationsDone
 ) {
+
     vector<Point> centroids =
         initializeCentroids(data);
+
+    iterationsDone = 0;
 
     for (int iteration = 0;
          iteration < MAX_ITERATIONS;
@@ -253,6 +384,7 @@ vector<Point> runKMeansParallel(
 
         // Step 1:
         // Assign each point to nearest centroid
+
         assignClustersParallel(
             data,
             centroids,
@@ -261,6 +393,7 @@ vector<Point> runKMeansParallel(
 
         // Step 2:
         // Calculate new centroids
+
         vector<Point> newCentroids =
             updateCentroidsParallel(
                 data,
@@ -270,6 +403,7 @@ vector<Point> runKMeansParallel(
 
         // Step 3:
         // Check centroid movement
+
         double maxMovement = 0.0;
 
         for (int c = 0; c < K; c++) {
@@ -288,14 +422,19 @@ vector<Point> runKMeansParallel(
 
         centroids = newCentroids;
 
+        // Record number of iterations
+        iterationsDone = iteration + 1;
+
         // Step 4:
         // Check convergence
+
         if (maxMovement < TOLERANCE) {
             break;
         }
     }
 
     // Final assignment using final centroids
+
     assignClustersParallel(
         data,
         centroids,
@@ -308,9 +447,11 @@ vector<Point> runKMeansParallel(
 // -----------------------------
 // Main
 // -----------------------------
+
 int main(int argc, char* argv[]) {
 
     if (argc != 2) {
+
         cerr << "Usage: "
              << argv[0]
              << " <csv_file>"
@@ -324,6 +465,7 @@ int main(int argc, char* argv[]) {
         string filename = argv[1];
 
         // Load dataset
+
         vector<Point> data =
             loadData(filename);
 
@@ -332,13 +474,17 @@ int main(int argc, char* argv[]) {
         // -----------------------------
         // Time ONLY K-Means execution
         // -----------------------------
+
         auto start =
             chrono::high_resolution_clock::now();
+
+        int iterationsDone = 0;
 
         vector<Point> centroids =
             runKMeansParallel(
                 data,
-                labels
+                labels,
+                iterationsDone
             );
 
         auto end =
@@ -350,6 +496,7 @@ int main(int argc, char* argv[]) {
         // -----------------------------
         // Calculate cluster sizes
         // -----------------------------
+
         vector<int> clusterCounts(K, 0);
 
         for (int label : labels) {
@@ -359,6 +506,7 @@ int main(int argc, char* argv[]) {
         // -----------------------------
         // Calculate inertia
         // -----------------------------
+
         double inertia = 0.0;
 
         for (int i = 0;
@@ -375,6 +523,7 @@ int main(int argc, char* argv[]) {
         // -----------------------------
         // Output
         // -----------------------------
+
         cout << "Customers: "
              << data.size()
              << endl;
@@ -385,6 +534,10 @@ int main(int argc, char* argv[]) {
 
         cout << "Threads: "
              << omp_get_max_threads()
+             << endl;
+
+        cout << "Iterations: "
+             << iterationsDone
              << endl;
 
         cout << "Execution time: "
@@ -400,6 +553,7 @@ int main(int argc, char* argv[]) {
              << endl;
 
         for (int c = 0; c < K; c++) {
+
             cout << "Cluster "
                  << c
                  << ": "
